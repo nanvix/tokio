@@ -276,10 +276,20 @@ impl TcpSocket {
     ///     Ok(())
     /// }
     /// ```
-    #[cfg(all(unix, not(target_os = "solaris"), not(target_os = "illumos")))]
+    #[cfg(all(
+        unix,
+        not(target_os = "solaris"),
+        not(target_os = "illumos"),
+        not(target_os = "nanvix")
+    ))]
     #[cfg_attr(
         docsrs,
-        doc(cfg(all(unix, not(target_os = "solaris"), not(target_os = "illumos"))))
+        doc(cfg(all(
+            unix,
+            not(target_os = "solaris"),
+            not(target_os = "illumos"),
+            not(target_os = "nanvix")
+        )))
     )]
     pub fn set_reuseport(&self, reuseport: bool) -> io::Result<()> {
         self.inner.set_reuse_port(reuseport)
@@ -311,10 +321,20 @@ impl TcpSocket {
     ///     Ok(())
     /// }
     /// ```
-    #[cfg(all(unix, not(target_os = "solaris"), not(target_os = "illumos")))]
+    #[cfg(all(
+        unix,
+        not(target_os = "solaris"),
+        not(target_os = "illumos"),
+        not(target_os = "nanvix")
+    ))]
     #[cfg_attr(
         docsrs,
-        doc(cfg(all(unix, not(target_os = "solaris"), not(target_os = "illumos"))))
+        doc(cfg(all(
+            unix,
+            not(target_os = "solaris"),
+            not(target_os = "illumos"),
+            not(target_os = "nanvix")
+        )))
     )]
     pub fn reuseport(&self) -> io::Result<bool> {
         self.inner.reuse_port()
@@ -469,7 +489,8 @@ impl TcpSocket {
         target_os = "redox",
         target_os = "solaris",
         target_os = "illumos",
-        target_os = "haiku"
+        target_os = "haiku",
+        target_os = "nanvix",
     )))]
     #[cfg_attr(
         docsrs,
@@ -478,7 +499,8 @@ impl TcpSocket {
             target_os = "redox",
             target_os = "solaris",
             target_os = "illumos",
-            target_os = "haiku"
+            target_os = "haiku",
+            target_os = "nanvix",
         ))))
     )]
     pub fn tos(&self) -> io::Result<u32> {
@@ -498,7 +520,8 @@ impl TcpSocket {
         target_os = "redox",
         target_os = "solaris",
         target_os = "illumos",
-        target_os = "haiku"
+        target_os = "haiku",
+        target_os = "nanvix",
     )))]
     #[cfg_attr(
         docsrs,
@@ -507,7 +530,8 @@ impl TcpSocket {
             target_os = "redox",
             target_os = "solaris",
             target_os = "illumos",
-            target_os = "haiku"
+            target_os = "haiku",
+            target_os = "nanvix",
         ))))
     )]
     pub fn set_tos(&self, tos: u32) -> io::Result<()> {
@@ -639,8 +663,12 @@ impl TcpSocket {
     /// ```
     pub async fn connect(self, addr: SocketAddr) -> io::Result<TcpStream> {
         if let Err(err) = self.inner.connect(&addr.into()) {
-            #[cfg(unix)]
+            #[cfg(all(unix, not(target_os = "nanvix")))]
             if err.raw_os_error() != Some(libc::EINPROGRESS) {
+                return Err(err);
+            }
+            #[cfg(target_os = "nanvix")]
+            if err.kind() != io::ErrorKind::WouldBlock {
                 return Err(err);
             }
             #[cfg(windows)]
