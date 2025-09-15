@@ -109,11 +109,11 @@ tracing = { version = "0.1.29", default-features = false, features = ["std"], op
 backtrace = { version = "0.3.58" }
 
 [target.'cfg(unix)'.dependencies]
-libc = { git = "https://github.com/nanvix/libc", branch = "nanvix/v0.2.173-dev", optional = true }
+libc = { git = "https://github.com/nanvix/libc", rev = "faee82bb537028babe248c90b645333aa92a2eed", optional = true }
 signal-hook-registry = { version = "1.1.1", optional = true }
 
 [target.'cfg(unix)'.dev-dependencies]
-libc = { git = "https://github.com/nanvix/libc", branch = "nanvix/v0.2.173-dev" }
+libc = { git = "https://github.com/nanvix/libc", rev = "faee82bb537028babe248c90b645333aa92a2eed" }
 nix = { version = "0.29.0", default-features = false, features = ["aio", "fs", "socket"] }
 
 [target.'cfg(windows)'.dependencies.windows-sys]
